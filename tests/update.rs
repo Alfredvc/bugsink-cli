@@ -48,6 +48,7 @@ async fn test_update_up_to_date() {
             "tag_name": "v0.1.0",
             "name": "v0.1.0"
         })))
+        .expect(1)
         .mount(&server)
         .await;
 
@@ -85,6 +86,7 @@ async fn test_update_successful() {
             "tag_name": "v0.2.0",
             "name": "v0.2.0"
         })))
+        .expect(1)
         .mount(&server)
         .await;
 
@@ -101,6 +103,7 @@ async fn test_update_successful() {
                 .set_body_bytes(tarball)
                 .insert_header("content-type", "application/octet-stream"),
         )
+        .expect(1)
         .mount(&server)
         .await;
 
@@ -142,6 +145,7 @@ async fn test_update_rate_limit_error() {
         .respond_with(ResponseTemplate::new(403).set_body_json(serde_json::json!({
             "message": "API rate limit exceeded"
         })))
+        .expect(1)
         .mount(&server)
         .await;
 
@@ -178,8 +182,48 @@ async fn test_update_rate_limit_error() {
 
 #[tokio::test]
 #[serial]
+async fn test_update_rate_limit_error_429() {
+    let server = MockServer::start().await;
+
+    // Mock GitHub API returning 429 (rate limit)
+    Mock::given(method("GET"))
+        .and(path("/repos/Alfredvc/bugsink-cli/releases/latest"))
+        .respond_with(ResponseTemplate::new(429).set_body_json(serde_json::json!({
+            "message": "API rate limit exceeded"
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let tmp_dir = tempfile::tempdir().unwrap();
+    let self_path = tmp_dir.path().join("bugsink");
+    std::fs::write(&self_path, b"old binary").unwrap();
+
+    let output = Command::cargo_bin("bugsink")
+        .unwrap()
+        .args(["--json", "update"])
+        .env("BUGSINK_GITHUB_API_URL", server.uri())
+        .env("BUGSINK_CURRENT_VERSION", "0.1.0")
+        .env("BUGSINK_SELF_PATH", self_path.to_str().unwrap())
+        .output()
+        .unwrap();
+
+    assert!(!output.status.success());
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let stderr_json: serde_json::Value = serde_json::from_str(&stderr).unwrap();
+    let error_msg = stderr_json["error"].as_str().unwrap();
+    assert!(
+        error_msg.contains("rate limit"),
+        "Expected rate limit message, got: {}",
+        error_msg
+    );
+}
+
+#[tokio::test]
+#[serial]
 async fn test_update_cargo_install_refusal() {
-    // Set BUGSINK_SELF_PATH to a path inside .cargo/bin
+    // No mock server needed: cargo-install check exits before any API call
     let cargo_path = "/home/testuser/.cargo/bin/bugsink";
 
     let output = Command::cargo_bin("bugsink")

@@ -120,6 +120,7 @@ No partial-update risk: the old binary remains in place until the atomic rename 
 
 The update command needs injectable parameters for testing:
 - **GitHub API URL** — override via `BUGSINK_GITHUB_API_URL` env var (defaults to `https://api.github.com`). Allows wiremock to serve mock responses.
+- **GitHub download URL** — override via `BUGSINK_GITHUB_DOWNLOAD_URL` env var (defaults to `https://github.com/Alfredvc/bugsink-cli/releases/download`). Allows wiremock to serve mock tarball downloads (separate from the API URL since downloads go to `github.com`, not `api.github.com`).
 - **Target binary path** — override via `BUGSINK_SELF_PATH` env var (defaults to `std::env::current_exe().canonicalize()`). Allows tests to target a disposable temp file instead of the real test binary.
 - **Current version** — override via `BUGSINK_CURRENT_VERSION` env var (defaults to `env!("CARGO_PKG_VERSION")`). Allows tests to simulate version comparisons without rebuilding.
 
