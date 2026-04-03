@@ -34,6 +34,13 @@ async fn login(output: &Output) -> Result<()> {
         anyhow::bail!("URL cannot be empty");
     }
 
+    // Auto-prepend https:// if no scheme provided
+    let url = if !url.starts_with("http://") && !url.starts_with("https://") {
+        format!("https://{}", url)
+    } else {
+        url
+    };
+
     // Open browser to token page
     let token_url = format!("{}/bsmain/auth_tokens/", url);
     eprintln!("Opening {} in your browser...", token_url);
