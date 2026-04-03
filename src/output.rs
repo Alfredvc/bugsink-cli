@@ -25,6 +25,8 @@ impl Output {
     }
 
     /// Filter a JSON value to only include specified fields.
+    /// For paginated responses (objects with "results" array), filters items inside "results"
+    /// while preserving the pagination envelope.
     fn filter_fields(&self, value: Value) -> Value {
         let Some(fields) = &self.fields else {
             return value;
@@ -33,6 +35,14 @@ impl Output {
         match value {
             Value::Array(arr) => {
                 Value::Array(arr.into_iter().map(|v| self.filter_fields(v)).collect())
+            }
+            Value::Object(mut map) if map.contains_key("results") => {
+                if let Some(Value::Array(results)) = map.remove("results") {
+                    let filtered_results: Vec<Value> =
+                        results.into_iter().map(|v| self.filter_fields(v)).collect();
+                    map.insert("results".to_string(), Value::Array(filtered_results));
+                }
+                Value::Object(map)
             }
             Value::Object(map) => {
                 let filtered: serde_json::Map<String, Value> = map
@@ -83,6 +93,28 @@ mod tests {
         let input = json!([{"id": 1, "name": "a"}, {"id": 2, "name": "b"}]);
         let result = output.filter_fields(input);
         assert_eq!(result, json!([{"id": 1}, {"id": 2}]));
+    }
+
+    #[test]
+    fn test_filter_fields_paginated() {
+        let output = Output::new(false, Some("id,name".to_string()));
+        let input = json!({
+            "next": null,
+            "previous": null,
+            "results": [
+                {"id": 1, "name": "a", "extra": "removed"},
+                {"id": 2, "name": "b", "extra": "removed"}
+            ]
+        });
+        let result = output.filter_fields(input);
+        assert_eq!(
+            result,
+            json!({
+                "next": null,
+                "previous": null,
+                "results": [{"id": 1, "name": "a"}, {"id": 2, "name": "b"}]
+            })
+        );
     }
 
     #[test]

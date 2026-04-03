@@ -17,17 +17,16 @@ pub async fn run(
 
     match command {
         ProjectsCommands::List { team } => {
-            let mut query: Vec<(&str, String)> = Vec::new();
+            let mut query: Vec<(&str, &str)> = Vec::new();
             if let Some(team_id) = team {
-                query.push(("team", team_id.to_string()));
+                query.push(("team", team_id.as_str()));
             }
-            let query_refs: Vec<(&str, &str)> =
-                query.iter().map(|(k, v)| (*k, v.as_str())).collect();
+            let query_refs = &query;
             if all {
-                let results = client.list_all("projects/", &query_refs).await?;
+                let results = client.list_all("projects/", query_refs).await?;
                 output.print(Value::Array(results))
             } else {
-                let page = client.list("projects/", &query_refs).await?;
+                let page = client.list("projects/", query_refs).await?;
                 output.print(json!({
                     "next": page.next,
                     "previous": page.previous,

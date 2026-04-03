@@ -17,8 +17,7 @@ pub async fn run(
 
     match command {
         EventsCommands::List { issue, order } => {
-            let issue_str = issue.to_string();
-            let query = vec![("issue", issue_str.as_str()), ("order", order.as_str())];
+            let query = vec![("issue", issue.as_str()), ("order", order.as_str())];
             if all {
                 let results = client.list_all("events/", &query).await?;
                 output.print(Value::Array(results))

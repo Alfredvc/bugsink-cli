@@ -88,7 +88,7 @@ pub enum TeamsCommands {
     /// Get details for a specific team
     Get {
         /// Team ID
-        id: u64,
+        id: String,
     },
 }
 
@@ -98,7 +98,7 @@ pub enum ProjectsCommands {
     List {
         /// Filter by team ID
         #[arg(long)]
-        team: Option<u64>,
+        team: Option<String>,
     },
     /// Get details for a specific project
     Get {
@@ -109,7 +109,7 @@ pub enum ProjectsCommands {
     Create {
         /// Team ID to create the project in
         #[arg(long)]
-        team: u64,
+        team: String,
         /// Project name
         #[arg(long)]
         name: String,
@@ -165,7 +165,7 @@ pub enum IssuesCommands {
     /// Get details for a specific issue
     Get {
         /// Issue ID
-        id: u64,
+        id: String,
     },
 }
 
@@ -175,7 +175,7 @@ pub enum EventsCommands {
     List {
         /// Issue ID (required)
         #[arg(long)]
-        issue: u64,
+        issue: String,
         /// Order: asc or desc (default)
         #[arg(long, default_value = "desc")]
         order: SortOrder,
@@ -203,7 +203,7 @@ pub enum ReleasesCommands {
     /// Get details for a specific release
     Get {
         /// Release ID
-        id: u64,
+        id: String,
     },
     /// Create a new release
     Create {
