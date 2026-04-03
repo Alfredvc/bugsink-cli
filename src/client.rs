@@ -119,7 +119,9 @@ impl BugsinkClient {
     /// GET raw text (used for stacktrace markdown endpoint).
     pub async fn get_text(&self, path: &str) -> Result<String> {
         let url = self.api_url(path);
-        let response = self.http.get(&url).send().await
+        let response = self.http.get(&url)
+            .header("Accept", "text/plain")
+            .send().await
             .with_context(|| format!("Request failed: GET {}", url))?;
 
         let status = response.status();
@@ -229,6 +231,42 @@ mod tests {
         let client = BugsinkClient::new(&server.uri(), "test-token").unwrap();
         let page = client.list("issues/", &[("project", "5")]).await.unwrap();
         assert_eq!(page.results.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn test_list_all_multi_page() {
+        let server = MockServer::start().await;
+        let page2_url = format!("{}/api/canonical/0/teams/?page=2", server.uri());
+
+        Mock::given(method("GET"))
+            .and(path("/api/canonical/0/teams/"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "next": page2_url,
+                "previous": null,
+                "results": [{"id": 1, "name": "Team A"}]
+            })))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/api/canonical/0/teams/"))
+            .and(query_param("page", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "next": null,
+                "previous": null,
+                "results": [{"id": 2, "name": "Team B"}]
+            })))
+            .expect(1)
+            .with_priority(1)
+            .mount(&server)
+            .await;
+
+        let client = BugsinkClient::new(&server.uri(), "test-token").unwrap();
+        let results = client.list_all("teams/", &[]).await.unwrap();
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0]["name"], "Team A");
+        assert_eq!(results[1]["name"], "Team B");
     }
 
     #[tokio::test]
