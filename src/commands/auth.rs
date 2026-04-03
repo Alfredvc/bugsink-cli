@@ -9,12 +9,12 @@ use std::io::{self, BufRead, Write};
 pub async fn run(
     command: &AuthCommands,
     output: &Output,
-    _url: Option<&str>,
-    _token: Option<&str>,
+    url: Option<&str>,
+    token: Option<&str>,
 ) -> Result<()> {
     match command {
         AuthCommands::Login => login(output).await,
-        AuthCommands::Status { verify } => status(*verify, output).await,
+        AuthCommands::Status { verify } => status(*verify, output, url, token).await,
         AuthCommands::Logout => logout(output).await,
     }
 }
@@ -78,25 +78,27 @@ async fn login(output: &Output) -> Result<()> {
     Ok(())
 }
 
-async fn status(verify: bool, output: &Output) -> Result<()> {
-    let config = Config::load()?;
-
-    match (&config.url, &config.token) {
-        (Some(url), Some(_)) => {
+async fn status(
+    verify: bool,
+    output: &Output,
+    url: Option<&str>,
+    token: Option<&str>,
+) -> Result<()> {
+    match Config::resolve(url, token) {
+        Ok(resolved) => {
             if verify {
-                let resolved = Config::resolve(None, None)?;
                 let client = BugsinkClient::new(&resolved.url, &resolved.token)?;
                 match client.list("teams/", &[]).await {
                     Ok(_) => {
                         output.print(json!({
                             "status": "verified",
-                            "url": url,
+                            "url": resolved.url,
                         }))?;
                     }
                     Err(e) => {
                         output.print(json!({
                             "status": "error",
-                            "url": url,
+                            "url": resolved.url,
                             "error": e.to_string(),
                         }))?;
                     }
@@ -104,11 +106,11 @@ async fn status(verify: bool, output: &Output) -> Result<()> {
             } else {
                 output.print(json!({
                     "status": "configured",
-                    "url": url,
+                    "url": resolved.url,
                 }))?;
             }
         }
-        _ => {
+        Err(_) => {
             output.print(json!({
                 "status": "not_configured",
             }))?;

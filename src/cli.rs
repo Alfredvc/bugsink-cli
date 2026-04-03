@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
 #[command(
@@ -116,6 +116,38 @@ pub enum ProjectsCommands {
     },
 }
 
+#[derive(Clone, ValueEnum)]
+pub enum SortField {
+    #[value(name = "digest_order")]
+    DigestOrder,
+    #[value(name = "last_seen")]
+    LastSeen,
+}
+
+impl SortField {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::DigestOrder => "digest_order",
+            Self::LastSeen => "last_seen",
+        }
+    }
+}
+
+#[derive(Clone, ValueEnum)]
+pub enum SortOrder {
+    Asc,
+    Desc,
+}
+
+impl SortOrder {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Asc => "asc",
+            Self::Desc => "desc",
+        }
+    }
+}
+
 #[derive(Subcommand)]
 pub enum IssuesCommands {
     /// List issues for a project
@@ -125,10 +157,10 @@ pub enum IssuesCommands {
         project: u64,
         /// Sort by: digest_order (default) or last_seen
         #[arg(long, default_value = "digest_order")]
-        sort: String,
+        sort: SortField,
         /// Order: asc (default) or desc
         #[arg(long, default_value = "asc")]
-        order: String,
+        order: SortOrder,
     },
     /// Get details for a specific issue
     Get {
@@ -146,7 +178,7 @@ pub enum EventsCommands {
         issue: u64,
         /// Order: asc or desc (default)
         #[arg(long, default_value = "desc")]
-        order: String,
+        order: SortOrder,
     },
     /// Get details for a specific event
     Get {

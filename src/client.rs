@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
+use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, AUTHORIZATION};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -22,17 +22,13 @@ impl BugsinkClient {
         let mut header_val = HeaderValue::from_str(&auth_value).context("Invalid token format")?;
         header_val.set_sensitive(true);
         headers.insert(AUTHORIZATION, header_val);
-        headers.insert(
-            reqwest::header::ACCEPT,
-            HeaderValue::from_static("application/json"),
-        );
 
         let http = reqwest::Client::builder()
             .default_headers(headers)
             .build()
             .context("Failed to build HTTP client")?;
 
-        let base_url = url.trim_end_matches('/').to_string();
+        let base_url = url.to_string();
 
         Ok(Self { http, base_url })
     }
@@ -51,6 +47,7 @@ impl BugsinkClient {
         let response = self
             .http
             .get(&url)
+            .header(ACCEPT, "application/json")
             .send()
             .await
             .with_context(|| format!("Request failed: GET {}", url))?;
@@ -73,6 +70,7 @@ impl BugsinkClient {
         let response = self
             .http
             .get(&url)
+            .header(ACCEPT, "application/json")
             .query(query)
             .send()
             .await
@@ -104,6 +102,7 @@ impl BugsinkClient {
             let response = self
                 .http
                 .get(&url)
+                .header(ACCEPT, "application/json")
                 .send()
                 .await
                 .with_context(|| format!("Request failed: GET {}", url))?;
@@ -131,6 +130,7 @@ impl BugsinkClient {
         let response = self
             .http
             .post(&url)
+            .header(ACCEPT, "application/json")
             .json(body)
             .send()
             .await
