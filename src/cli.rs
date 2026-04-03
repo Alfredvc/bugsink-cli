@@ -65,6 +65,8 @@ pub enum Commands {
     },
     /// Fetch API schema for agent discoverability
     Describe,
+    /// Update bugsink to the latest version
+    Update,
 }
 
 #[derive(Subcommand)]

@@ -38,6 +38,7 @@ async fn main() -> Result<()> {
             commands::releases::run(command, &output, url_ref, token_ref, all).await
         }
         Commands::Describe => commands::describe::run(&output, url_ref, token_ref).await,
+        Commands::Update => commands::update::run(&output).await,
     };
 
     if let Err(e) = result {

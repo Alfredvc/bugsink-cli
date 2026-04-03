@@ -5,3 +5,4 @@ pub mod issues;
 pub mod projects;
 pub mod releases;
 pub mod teams;
+pub mod update;

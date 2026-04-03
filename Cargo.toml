@@ -14,10 +14,14 @@ path = "src/main.rs"
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 dirs = "6"
+flate2 = "1"
 open = "5"
 reqwest = { version = "0.13", features = ["json", "query", "rustls"] }
+semver = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tar = "0.4"
+tempfile = "3"
 tokio = { version = "1", features = ["full"] }
 
 [dev-dependencies]
