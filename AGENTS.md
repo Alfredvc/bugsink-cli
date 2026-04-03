@@ -60,6 +60,9 @@ Exit code 0 = success, 1 = error.
 ### Schema Discovery
 - `bugsink describe` — Fetch full OpenAPI schema (for runtime introspection)
 
+### Self-Update
+- `bugsink update` — Update to the latest version
+
 ## Typical Agent Workflow
 
 ```bash
