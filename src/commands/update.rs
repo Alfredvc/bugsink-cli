@@ -147,11 +147,20 @@ fn detect_platform() -> Result<(&'static str, &'static str)> {
     Ok((os, arch))
 }
 
+/// Get the GitHub download base URL, allowing override via env var for testing.
+fn github_download_base_url() -> String {
+    std::env::var("BUGSINK_GITHUB_DOWNLOAD_URL")
+        .unwrap_or_else(|_| format!("https://github.com/{}/releases/download", GITHUB_REPO))
+}
+
 /// Build the download URL for a release artifact.
 fn download_url(version: &Version, os: &str, arch: &str) -> String {
     format!(
-        "https://github.com/{}/releases/download/v{}/bugsink-{}-{}.tar.gz",
-        GITHUB_REPO, version, os, arch
+        "{}/v{}/bugsink-{}-{}.tar.gz",
+        github_download_base_url(),
+        version,
+        os,
+        arch
     )
 }
 
@@ -160,6 +169,8 @@ async fn download_tarball(
     client: &reqwest::Client,
     url: &str,
     dir: &std::path::Path,
+    os: &str,
+    arch: &str,
 ) -> Result<tempfile::NamedTempFile> {
     let response = client
         .get(url)
@@ -170,8 +181,10 @@ async fn download_tarball(
     let status = response.status();
     if !status.is_success() {
         bail!(
-            "Failed to download release artifact (HTTP {}): {}",
-            status.as_u16(),
+            "No matching release artifact for this platform (OS: {}, arch: {}). \
+             Expected asset at {}",
+            os,
+            arch,
             url
         );
     }
@@ -283,7 +296,7 @@ pub async fn run(output: &Output) -> Result<()> {
     let client = build_github_client()?;
     let release = fetch_latest_release(&client).await?;
 
-    // Step 5: Compare versions
+    // Step 4: Compare versions
     let latest = parse_release_version(&release)?;
     if latest <= current {
         return output.print(serde_json::json!({
@@ -292,26 +305,26 @@ pub async fn run(output: &Output) -> Result<()> {
         }));
     }
 
-    // Step 6: Detect platform
+    // Step 5: Detect platform
     let (os, arch) = detect_platform()?;
 
-    // Step 7: Download tarball
+    // Step 6: Download tarball
     let url = download_url(&latest, os, arch);
     let exe_dir = exe_path
         .parent()
         .context("Failed to determine parent directory of current executable")?;
-    let tarball = download_tarball(&client, &url, exe_dir).await?;
+    let tarball = download_tarball(&client, &url, exe_dir, os, arch).await?;
 
-    // Step 8: Extract binary
+    // Step 7: Extract binary
     let new_binary = extract_binary(tarball.path(), exe_dir)?;
 
     // Clean up tarball temp file explicitly (extracted binary is what we need)
     drop(tarball);
 
-    // Step 9: Replace binary
+    // Step 8: Replace binary
     replace_binary(new_binary, &exe_path)?;
 
-    // Step 10: Output
+    // Step 9: Output
     output.print(serde_json::json!({
         "status": "updated",
         "previous_version": current.to_string(),
