@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Agent-friendly CLI for Bugsink error tracking"
 license = "MIT"
-repository = "https://github.com/bugsink/bugsink-cli"
+repository = "https://github.com/Alfredvc/bugsink-cli"
 
 [[bin]]
 name = "bugsink"

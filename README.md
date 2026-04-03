@@ -132,7 +132,21 @@ This CLI is designed for AI agent consumption. Key features:
 - **Field filtering** — `--fields` reduces token usage by returning only what's needed
 - **Pagination control** — `--all` for complete results, default single-page for speed
 
-See [AGENTS.md](AGENTS.md) for the agent-specific reference.
+### Agent Skills
+
+Install skills for AI coding agents (Claude Code, Cursor, Gemini CLI, etc.):
+
+```bash
+npx skills add Alfredvc/bugsink-cli
+```
+
+This installs workflow-oriented instruction files that teach agents how to use the CLI. Available skills:
+
+- **bugsink-shared** — Authentication, output format, error handling conventions
+- **bugsink-issue-triage** — Investigate errors: find issues, inspect events, read stacktraces
+- **bugsink-project-overview** — Onboard to an instance: teams, projects, releases, issue volume
+
+See [AGENTS.md](AGENTS.md) for the agent-specific command reference.
 
 ## License
 

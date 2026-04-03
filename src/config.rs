@@ -75,7 +75,14 @@ impl Config {
     /// Returns error if url or token cannot be resolved.
     pub fn resolve(cli_url: Option<&str>, cli_token: Option<&str>) -> Result<ResolvedConfig> {
         let file_config = Self::load().unwrap_or_default();
+        Self::resolve_with(cli_url, cli_token, file_config)
+    }
 
+    fn resolve_with(
+        cli_url: Option<&str>,
+        cli_token: Option<&str>,
+        file_config: Config,
+    ) -> Result<ResolvedConfig> {
         let url = cli_url
             .map(|s| s.to_string())
             .or_else(|| std::env::var("BUGSINK_URL").ok())
@@ -158,7 +165,7 @@ mod tests {
         std::env::remove_var("BUGSINK_URL");
         std::env::remove_var("BUGSINK_TOKEN");
 
-        let result = Config::resolve(None, Some("token"));
+        let result = Config::resolve_with(None, Some("token"), Config::default());
         assert!(result.is_err());
         assert!(result
             .unwrap_err()
@@ -172,7 +179,7 @@ mod tests {
         std::env::remove_var("BUGSINK_URL");
         std::env::remove_var("BUGSINK_TOKEN");
 
-        let result = Config::resolve(Some("https://example.com"), None);
+        let result = Config::resolve_with(Some("https://example.com"), None, Config::default());
         assert!(result.is_err());
         assert!(result
             .unwrap_err()
