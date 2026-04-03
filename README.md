@@ -7,18 +7,18 @@ A command-line interface for [Bugsink](https://www.bugsink.com/) error tracking.
 ### Install script (Linux/macOS)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/bugsink/bugsink-cli/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/Alfredvc/bugsink-cli/main/install.sh | sh
 ```
 
 ### From source
 
 ```bash
-cargo install --git https://github.com/bugsink/bugsink-cli
+cargo install --git https://github.com/Alfredvc/bugsink-cli
 ```
 
 ### From releases
 
-Download the latest binary for your platform from [GitHub Releases](https://github.com/bugsink/bugsink-cli/releases).
+Download the latest binary for your platform from [GitHub Releases](https://github.com/Alfredvc/bugsink-cli/releases).
 
 ## Quick Start
 
