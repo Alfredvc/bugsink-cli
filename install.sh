@@ -2,7 +2,7 @@
 set -e
 
 REPO="Alfredvc/bugsink-cli"
-INSTALL_DIR="${BUGSINK_INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${BUGSINK_INSTALL_DIR:-${HOME}/.local/bin}"
 
 # Detect OS and architecture
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
@@ -33,7 +33,17 @@ fi
 
 URL="https://github.com/${REPO}/releases/download/${BUGSINK_VERSION}/${ARTIFACT}.tar.gz"
 
+mkdir -p "$INSTALL_DIR"
+
 echo "Downloading bugsink ${BUGSINK_VERSION} for ${OS}/${ARCH}..."
 curl -fsSL "$URL" | tar xz -C "$INSTALL_DIR"
 echo "Installed bugsink to ${INSTALL_DIR}/bugsink"
+
+case ":$PATH:" in
+  *":${INSTALL_DIR}:"*) ;;
+  *) echo "Note: ${INSTALL_DIR} is not in your PATH. Add it with:"
+     echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""
+     ;;
+esac
+
 echo "Run 'bugsink --help' to get started."
