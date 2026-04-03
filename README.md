@@ -121,6 +121,11 @@ Errors go to stderr as JSON with exit code 1:
 |---------|-------------|
 | `bugsink describe` | Fetch the full OpenAPI schema |
 
+### Self-Update
+| Command | Description |
+|---------|-------------|
+| `bugsink update` | Update to the latest version |
+
 ## Agent Integration
 
 This CLI is designed for AI agent consumption. Key features:
