@@ -1,11 +1,17 @@
-use anyhow::Result;
 use crate::cli::ReleasesCommands;
 use crate::client::BugsinkClient;
 use crate::config::Config;
 use crate::output::Output;
+use anyhow::Result;
 use serde_json::{json, Value};
 
-pub async fn run(command: &ReleasesCommands, output: &Output, url: Option<&str>, token: Option<&str>, all: bool) -> Result<()> {
+pub async fn run(
+    command: &ReleasesCommands,
+    output: &Output,
+    url: Option<&str>,
+    token: Option<&str>,
+    all: bool,
+) -> Result<()> {
     let config = Config::resolve(url, token)?;
     let client = BugsinkClient::new(&config.url, &config.token)?;
 

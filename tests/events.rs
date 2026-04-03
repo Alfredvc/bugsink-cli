@@ -19,7 +19,17 @@ async fn test_events_list() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "events", "list", "--issue", "42"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "events",
+            "list",
+            "--issue",
+            "42",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("evt-abc"));
@@ -38,7 +48,16 @@ async fn test_events_get() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "events", "get", "evt-abc"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "events",
+            "get",
+            "evt-abc",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("NullPointerException"));
@@ -49,14 +68,24 @@ async fn test_events_stacktrace() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .and(path("/api/canonical/0/events/evt-abc/stacktrace/"))
-        .respond_with(ResponseTemplate::new(200)
-            .set_body_string("## Stacktrace\n\n```\nFile \"app.py\", line 42\n```"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_string("## Stacktrace\n\n```\nFile \"app.py\", line 42\n```"),
+        )
         .mount(&server)
         .await;
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "events", "stacktrace", "evt-abc"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "events",
+            "stacktrace",
+            "evt-abc",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Stacktrace"))

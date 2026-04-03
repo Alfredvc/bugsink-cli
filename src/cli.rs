@@ -1,7 +1,11 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "bugsink", version, about = "Agent-friendly CLI for Bugsink error tracking")]
+#[command(
+    name = "bugsink",
+    version,
+    about = "Agent-friendly CLI for Bugsink error tracking"
+)]
 pub struct Cli {
     /// Bugsink instance URL (overrides config and BUGSINK_URL env var)
     #[arg(long, global = true)]

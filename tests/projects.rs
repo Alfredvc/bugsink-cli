@@ -18,7 +18,15 @@ async fn test_projects_list() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "projects", "list"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "projects",
+            "list",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("My App"));
@@ -40,7 +48,17 @@ async fn test_projects_list_by_team() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "projects", "list", "--team", "3"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "projects",
+            "list",
+            "--team",
+            "3",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Team Project"));
@@ -59,7 +77,16 @@ async fn test_projects_get() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "projects", "get", "1"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "projects",
+            "get",
+            "1",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("my-app"));
@@ -78,7 +105,19 @@ async fn test_projects_create() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "projects", "create", "--team", "1", "--name", "New Project"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "projects",
+            "create",
+            "--team",
+            "1",
+            "--name",
+            "New Project",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("New Project"));

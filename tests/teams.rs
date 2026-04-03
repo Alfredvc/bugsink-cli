@@ -22,7 +22,15 @@ async fn test_teams_list() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "test-token", "--json", "teams", "list"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "test-token",
+            "--json",
+            "teams",
+            "list",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Backend"))
@@ -42,7 +50,16 @@ async fn test_teams_get() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "test-token", "--json", "teams", "get", "1"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "test-token",
+            "--json",
+            "teams",
+            "get",
+            "1",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Backend"));

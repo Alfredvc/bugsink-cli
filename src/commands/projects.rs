@@ -1,11 +1,17 @@
-use anyhow::Result;
 use crate::cli::ProjectsCommands;
 use crate::client::BugsinkClient;
 use crate::config::Config;
 use crate::output::Output;
+use anyhow::Result;
 use serde_json::{json, Value};
 
-pub async fn run(command: &ProjectsCommands, output: &Output, url: Option<&str>, token: Option<&str>, all: bool) -> Result<()> {
+pub async fn run(
+    command: &ProjectsCommands,
+    output: &Output,
+    url: Option<&str>,
+    token: Option<&str>,
+    all: bool,
+) -> Result<()> {
     let config = Config::resolve(url, token)?;
     let client = BugsinkClient::new(&config.url, &config.token)?;
 
@@ -15,7 +21,8 @@ pub async fn run(command: &ProjectsCommands, output: &Output, url: Option<&str>,
             if let Some(team_id) = team {
                 query.push(("team", team_id.to_string()));
             }
-            let query_refs: Vec<(&str, &str)> = query.iter().map(|(k, v)| (*k, v.as_str())).collect();
+            let query_refs: Vec<(&str, &str)> =
+                query.iter().map(|(k, v)| (*k, v.as_str())).collect();
             if all {
                 let results = client.list_all("projects/", &query_refs).await?;
                 output.print(Value::Array(results))

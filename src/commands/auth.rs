@@ -1,12 +1,17 @@
-use anyhow::{Context, Result};
 use crate::cli::AuthCommands;
 use crate::client::BugsinkClient;
 use crate::config::Config;
 use crate::output::Output;
+use anyhow::{Context, Result};
 use serde_json::json;
 use std::io::{self, BufRead, Write};
 
-pub async fn run(command: &AuthCommands, output: &Output, _url: Option<&str>, _token: Option<&str>) -> Result<()> {
+pub async fn run(
+    command: &AuthCommands,
+    output: &Output,
+    _url: Option<&str>,
+    _token: Option<&str>,
+) -> Result<()> {
     match command {
         AuthCommands::Login => login(output).await,
         AuthCommands::Status { verify } => status(*verify, output).await,
@@ -53,7 +58,9 @@ async fn login(output: &Output) -> Result<()> {
     // Verify connection
     eprintln!("Verifying connection...");
     let client = BugsinkClient::new(&url, &token)?;
-    client.list("teams/", &[]).await
+    client
+        .list("teams/", &[])
+        .await
         .context("Failed to connect to Bugsink. Check your URL and token.")?;
 
     // Save config

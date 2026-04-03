@@ -1,7 +1,7 @@
-use anyhow::Result;
 use crate::client::BugsinkClient;
 use crate::config::Config;
 use crate::output::Output;
+use anyhow::Result;
 
 pub async fn run(output: &Output, url: Option<&str>, token: Option<&str>) -> Result<()> {
     let config = Config::resolve(url, token)?;

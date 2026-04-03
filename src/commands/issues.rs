@@ -1,16 +1,26 @@
-use anyhow::Result;
 use crate::cli::IssuesCommands;
 use crate::client::BugsinkClient;
 use crate::config::Config;
 use crate::output::Output;
+use anyhow::Result;
 use serde_json::Value;
 
-pub async fn run(command: &IssuesCommands, output: &Output, url: Option<&str>, token: Option<&str>, all: bool) -> Result<()> {
+pub async fn run(
+    command: &IssuesCommands,
+    output: &Output,
+    url: Option<&str>,
+    token: Option<&str>,
+    all: bool,
+) -> Result<()> {
     let config = Config::resolve(url, token)?;
     let client = BugsinkClient::new(&config.url, &config.token)?;
 
     match command {
-        IssuesCommands::List { project, sort, order } => {
+        IssuesCommands::List {
+            project,
+            sort,
+            order,
+        } => {
             let project_str = project.to_string();
             let query = vec![
                 ("project", project_str.as_str()),

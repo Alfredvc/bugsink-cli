@@ -73,10 +73,7 @@ impl Config {
 
     /// Resolve config by merging CLI flags > env vars > config file.
     /// Returns error if url or token cannot be resolved.
-    pub fn resolve(
-        cli_url: Option<&str>,
-        cli_token: Option<&str>,
-    ) -> Result<ResolvedConfig> {
+    pub fn resolve(cli_url: Option<&str>, cli_token: Option<&str>) -> Result<ResolvedConfig> {
         let file_config = Self::load().unwrap_or_default();
 
         let url = cli_url
@@ -89,7 +86,9 @@ impl Config {
             .map(|s| s.to_string())
             .or_else(|| std::env::var("BUGSINK_TOKEN").ok())
             .or(file_config.token)
-            .context("Bugsink token not configured. Run `bugsink auth login` or set BUGSINK_TOKEN.")?;
+            .context(
+                "Bugsink token not configured. Run `bugsink auth login` or set BUGSINK_TOKEN.",
+            )?;
 
         // Normalize URL: strip trailing slash
         let url = url.trim_end_matches('/').to_string();
@@ -135,11 +134,8 @@ mod tests {
         std::env::remove_var("BUGSINK_URL");
         std::env::remove_var("BUGSINK_TOKEN");
 
-        let resolved = Config::resolve(
-            Some("https://cli-flag.example.com"),
-            Some("cli-token"),
-        )
-        .unwrap();
+        let resolved =
+            Config::resolve(Some("https://cli-flag.example.com"), Some("cli-token")).unwrap();
 
         assert_eq!(resolved.url, "https://cli-flag.example.com");
         assert_eq!(resolved.token, "cli-token");
@@ -151,11 +147,7 @@ mod tests {
         std::env::remove_var("BUGSINK_URL");
         std::env::remove_var("BUGSINK_TOKEN");
 
-        let resolved = Config::resolve(
-            Some("https://example.com/"),
-            Some("token"),
-        )
-        .unwrap();
+        let resolved = Config::resolve(Some("https://example.com/"), Some("token")).unwrap();
 
         assert_eq!(resolved.url, "https://example.com");
     }
@@ -168,7 +160,10 @@ mod tests {
 
         let result = Config::resolve(None, Some("token"));
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("URL not configured"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("URL not configured"));
     }
 
     #[test]
@@ -179,6 +174,9 @@ mod tests {
 
         let result = Config::resolve(Some("https://example.com"), None);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("token not configured"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("token not configured"));
     }
 }

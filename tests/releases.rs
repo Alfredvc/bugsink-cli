@@ -19,7 +19,17 @@ async fn test_releases_list() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "releases", "list", "--project", "1"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "releases",
+            "list",
+            "--project",
+            "1",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("1.0.0"));
@@ -38,7 +48,16 @@ async fn test_releases_get() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "releases", "get", "1"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "releases",
+            "get",
+            "1",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("1.0.0"));
@@ -57,7 +76,19 @@ async fn test_releases_create() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "releases", "create", "--project", "1", "--version", "2.0.0"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "releases",
+            "create",
+            "--project",
+            "1",
+            "--version",
+            "2.0.0",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("2.0.0"));

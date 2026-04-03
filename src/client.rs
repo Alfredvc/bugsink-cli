@@ -19,11 +19,13 @@ impl BugsinkClient {
     pub fn new(url: &str, token: &str) -> Result<Self> {
         let mut headers = HeaderMap::new();
         let auth_value = format!("Bearer {}", token);
-        let mut header_val = HeaderValue::from_str(&auth_value)
-            .context("Invalid token format")?;
+        let mut header_val = HeaderValue::from_str(&auth_value).context("Invalid token format")?;
         header_val.set_sensitive(true);
         headers.insert(AUTHORIZATION, header_val);
-        headers.insert(reqwest::header::ACCEPT, HeaderValue::from_static("application/json"));
+        headers.insert(
+            reqwest::header::ACCEPT,
+            HeaderValue::from_static("application/json"),
+        );
 
         let http = reqwest::Client::builder()
             .default_headers(headers)
@@ -36,13 +38,21 @@ impl BugsinkClient {
     }
 
     fn api_url(&self, path: &str) -> String {
-        format!("{}/api/canonical/0/{}", self.base_url, path.trim_start_matches('/'))
+        format!(
+            "{}/api/canonical/0/{}",
+            self.base_url,
+            path.trim_start_matches('/')
+        )
     }
 
     /// GET a single resource, returns the JSON value.
     pub async fn get(&self, path: &str) -> Result<Value> {
         let url = self.api_url(path);
-        let response = self.http.get(&url).send().await
+        let response = self
+            .http
+            .get(&url)
+            .send()
+            .await
             .with_context(|| format!("Request failed: GET {}", url))?;
 
         let status = response.status();
@@ -51,14 +61,21 @@ impl BugsinkClient {
             bail!("API error ({}): {}", status, body);
         }
 
-        response.json::<Value>().await
+        response
+            .json::<Value>()
+            .await
             .with_context(|| format!("Failed to parse JSON from: GET {}", url))
     }
 
     /// GET a paginated list. Returns one page of results.
     pub async fn list(&self, path: &str, query: &[(&str, &str)]) -> Result<PaginatedResponse> {
         let url = self.api_url(path);
-        let response = self.http.get(&url).query(query).send().await
+        let response = self
+            .http
+            .get(&url)
+            .query(query)
+            .send()
+            .await
             .with_context(|| format!("Request failed: GET {}", url))?;
 
         let status = response.status();
@@ -67,7 +84,9 @@ impl BugsinkClient {
             bail!("API error ({}): {}", status, body);
         }
 
-        response.json::<PaginatedResponse>().await
+        response
+            .json::<PaginatedResponse>()
+            .await
             .with_context(|| format!("Failed to parse paginated response from: GET {}", url))
     }
 
@@ -82,7 +101,11 @@ impl BugsinkClient {
 
         // Follow next pages
         while let Some(url) = next_url {
-            let response = self.http.get(&url).send().await
+            let response = self
+                .http
+                .get(&url)
+                .send()
+                .await
                 .with_context(|| format!("Request failed: GET {}", url))?;
 
             let status = response.status();
@@ -91,7 +114,9 @@ impl BugsinkClient {
                 bail!("API error ({}): {}", status, body);
             }
 
-            let page: PaginatedResponse = response.json().await
+            let page: PaginatedResponse = response
+                .json()
+                .await
                 .with_context(|| format!("Failed to parse paginated response from: GET {}", url))?;
             all_results.extend(page.results);
             next_url = page.next;
@@ -103,7 +128,12 @@ impl BugsinkClient {
     /// POST a resource with a JSON body.
     pub async fn post(&self, path: &str, body: &Value) -> Result<Value> {
         let url = self.api_url(path);
-        let response = self.http.post(&url).json(body).send().await
+        let response = self
+            .http
+            .post(&url)
+            .json(body)
+            .send()
+            .await
             .with_context(|| format!("Request failed: POST {}", url))?;
 
         let status = response.status();
@@ -112,16 +142,21 @@ impl BugsinkClient {
             bail!("API error ({}): {}", status, body);
         }
 
-        response.json::<Value>().await
+        response
+            .json::<Value>()
+            .await
             .with_context(|| format!("Failed to parse JSON from: POST {}", url))
     }
 
     /// GET raw text (used for stacktrace markdown endpoint).
     pub async fn get_text(&self, path: &str) -> Result<String> {
         let url = self.api_url(path);
-        let response = self.http.get(&url)
+        let response = self
+            .http
+            .get(&url)
             .header("Accept", "text/plain")
-            .send().await
+            .send()
+            .await
             .with_context(|| format!("Request failed: GET {}", url))?;
 
         let status = response.status();
@@ -130,16 +165,21 @@ impl BugsinkClient {
             bail!("API error ({}): {}", status, body);
         }
 
-        response.text().await
+        response
+            .text()
+            .await
             .with_context(|| format!("Failed to read text from: GET {}", url))
     }
 
     /// Fetch the raw OpenAPI schema JSON.
     pub async fn get_schema(&self) -> Result<Value> {
         let url = format!("{}/api/canonical/0/schema/", self.base_url);
-        let response = self.http.get(&url)
+        let response = self
+            .http
+            .get(&url)
             .header("Accept", "application/json")
-            .send().await
+            .send()
+            .await
             .with_context(|| format!("Request failed: GET {}", url))?;
 
         let status = response.status();
@@ -148,7 +188,9 @@ impl BugsinkClient {
             bail!("API error ({}): {}", status, body);
         }
 
-        response.json::<Value>().await
+        response
+            .json::<Value>()
+            .await
             .with_context(|| format!("Failed to parse schema from: GET {}", url))
     }
 }
@@ -165,9 +207,10 @@ mod tests {
         Mock::given(method("GET"))
             .and(path("/api/canonical/0/teams/1/"))
             .and(header("Authorization", "Bearer test-token"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                serde_json::json!({"id": 1, "name": "Test Team"}),
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(serde_json::json!({"id": 1, "name": "Test Team"})),
+            )
             .mount(&server)
             .await;
 
@@ -274,9 +317,10 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(path("/api/canonical/0/projects/"))
-            .respond_with(ResponseTemplate::new(201).set_body_json(
-                serde_json::json!({"id": 10, "name": "New Project"}),
-            ))
+            .respond_with(
+                ResponseTemplate::new(201)
+                    .set_body_json(serde_json::json!({"id": 10, "name": "New Project"})),
+            )
             .mount(&server)
             .await;
 

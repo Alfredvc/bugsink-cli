@@ -19,18 +19,33 @@ async fn main() -> Result<()> {
     let all = cli.all;
 
     let result = match &cli.command {
-        Commands::Auth { command } => commands::auth::run(command, &output, url_ref, token_ref).await,
-        Commands::Teams { command } => commands::teams::run(command, &output, url_ref, token_ref, all).await,
-        Commands::Projects { command } => commands::projects::run(command, &output, url_ref, token_ref, all).await,
-        Commands::Issues { command } => commands::issues::run(command, &output, url_ref, token_ref, all).await,
-        Commands::Events { command } => commands::events::run(command, &output, url_ref, token_ref, all).await,
-        Commands::Releases { command } => commands::releases::run(command, &output, url_ref, token_ref, all).await,
+        Commands::Auth { command } => {
+            commands::auth::run(command, &output, url_ref, token_ref).await
+        }
+        Commands::Teams { command } => {
+            commands::teams::run(command, &output, url_ref, token_ref, all).await
+        }
+        Commands::Projects { command } => {
+            commands::projects::run(command, &output, url_ref, token_ref, all).await
+        }
+        Commands::Issues { command } => {
+            commands::issues::run(command, &output, url_ref, token_ref, all).await
+        }
+        Commands::Events { command } => {
+            commands::events::run(command, &output, url_ref, token_ref, all).await
+        }
+        Commands::Releases { command } => {
+            commands::releases::run(command, &output, url_ref, token_ref, all).await
+        }
         Commands::Describe => commands::describe::run(&output, url_ref, token_ref).await,
     };
 
     if let Err(e) = result {
         let error_json = serde_json::json!({"error": e.to_string()});
-        eprintln!("{}", serde_json::to_string(&error_json).unwrap_or_else(|_| e.to_string()));
+        eprintln!(
+            "{}",
+            serde_json::to_string(&error_json).unwrap_or_else(|_| e.to_string())
+        );
         std::process::exit(1);
     }
 

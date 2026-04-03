@@ -21,7 +21,17 @@ async fn test_issues_list() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "issues", "list", "--project", "1"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "issues",
+            "list",
+            "--project",
+            "1",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("NullPointerException"));
@@ -43,7 +53,21 @@ async fn test_issues_list_custom_sort() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "issues", "list", "--project", "1", "--sort", "last_seen", "--order", "asc"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "issues",
+            "list",
+            "--project",
+            "1",
+            "--sort",
+            "last_seen",
+            "--order",
+            "asc",
+        ])
         .assert()
         .success();
 }
@@ -61,7 +85,16 @@ async fn test_issues_get() {
 
     Command::cargo_bin("bugsink")
         .unwrap()
-        .args(["--url", &server.uri(), "--token", "t", "--json", "issues", "get", "42"])
+        .args([
+            "--url",
+            &server.uri(),
+            "--token",
+            "t",
+            "--json",
+            "issues",
+            "get",
+            "42",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("NullPointerException"));
